@@ -12,6 +12,7 @@ Minimalistic (Bare Boned) but works like a Downloader😅.
 
 ```bash
   python version > 3.11
+  ffmpeg
 ```
 
 
