@@ -20,7 +20,7 @@ Minimalistic (Bare Boned) but works like a Downloader😅.
 Run the `requirements.txt` to install the neccessary dependancies.
 
 ```bash
-  pip install -r requirements.txt
+pip install -r requirements.txt
 ```
     
 ## Usage/Examples
@@ -28,7 +28,7 @@ Run the `requirements.txt` to install the neccessary dependancies.
 Run the below code to get the user interface. 
 
 ```python
-  python ytmp3.py
+python ytmp3.py
 
 ```
 
