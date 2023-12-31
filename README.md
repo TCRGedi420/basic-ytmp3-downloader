@@ -36,7 +36,9 @@ Run the below code to get the user interface.
 ## Screenshots
 
 Main Interface
+
 ![App Screenshot](https://i.ibb.co/pbvkF45/y2mp3-capture.png)
 
 Downloaded File Listed
+
 ![App Screenshot](https://i.ibb.co/QDXkjb0/image.png)
