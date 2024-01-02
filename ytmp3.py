@@ -6,9 +6,11 @@ import os
 from moviepy.editor import AudioFileClip
 import re
 from PIL import Image, ImageTk
-import requests
 import threading
 import webbrowser
+import eyed3
+import requests
+import io
 
 # Define the global destination variable
 downloads_folder = os.path.join(os.path.expanduser('~'), 'Downloads')
@@ -37,13 +39,10 @@ def download_mp3():
             author_label.config(text=f"Author: {yt.author}")
             duration_label.config(text=f"Duration: {yt.length // 60}:{yt.length % 60:02}")
 
-            # Download the thumbnail
+            # Get the high-quality thumbnail URL
             thumbnail_url = yt.thumbnail_url
-            thumbnail_path = os.path.join(destination, 'thumbnail.jpg')
-            thumbnail = Image.open(requests.get(thumbnail_url, stream=True).raw)
-            thumbnail.save(thumbnail_path)
 
-            # Get the stream with the highest audio quality in MP4 format
+            # Download the stream with the highest audio quality in MP4 format
             audio_stream = yt.streams.filter(only_audio=True, file_extension='mp4').first()
             total_size[0] = audio_stream.filesize
 
@@ -52,15 +51,32 @@ def download_mp3():
             mp4_path = os.path.join(destination, mp4_filename)
             audio_stream.download(output_path=destination, filename=mp4_filename)
 
+            # Use the high-quality thumbnail URL directly
+            thumbnail_response = requests.get(thumbnail_url, stream=True)
+            thumbnail = Image.open(io.BytesIO(thumbnail_response.content))
+
             # Convert the downloaded MP4 file to MP3 using the moviepy library
             mp3_filename = f'{clean_filename(yt.title)}.mp3'
             mp3_path = os.path.join(destination, mp3_filename)
             audio_clip = AudioFileClip(mp4_path)
             audio_clip.write_audiofile(mp3_path, codec='libmp3lame', ffmpeg_params=['-q:a', '0'])
 
-            # Remove the temporary MP4 file and thumbnail
+            # Remove the temporary MP4 file
             os.remove(mp4_path)
-            os.remove(thumbnail_path)
+
+            # Use eyed3 to set album artwork (thumbnail) and add metadata
+            audiofile = eyed3.load(mp3_path)
+            thumbnail_bytes = io.BytesIO()
+            thumbnail.save(thumbnail_bytes, format='JPEG')
+            thumbnail_bytes.seek(0)
+            audiofile.tag.images.set(3, thumbnail_bytes.read(), 'image/jpeg')
+            
+            # Set Album and Artist metadata
+            audiofile.tag.album = yt.author
+            audiofile.tag.artist = yt.author
+            audiofile.tag.comments.set("Downloaded with YTMp3.py")
+
+            audiofile.tag.save()
 
             # Update the table with the downloaded MP3 information
             update_table(yt.title, yt.author, f"{yt.length // 60}:{yt.length % 60:02}", "Download Complete")
@@ -78,6 +94,7 @@ def download_mp3():
 
 def update_table(title, artist, duration, status):
     table.insert("", "end", values=(title, artist, duration, status), tags=status)
+
 
 def open_location():
     # Open Explorer to the file location
