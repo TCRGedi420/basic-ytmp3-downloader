@@ -1,5 +1,6 @@
 
 # Basic YTMP3 Downloader
+### (This only works with Windows systems)
 
 Minimalistic (Bare Boned) but works like a Downloader😅.
 
